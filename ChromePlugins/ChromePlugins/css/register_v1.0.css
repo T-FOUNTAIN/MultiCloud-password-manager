@@ -1,0 +1,181 @@
+@charset "utf-8";
+/* CSS Document */
+
+*{
+	margin: 0;
+	padding: 0;
+}
+
+body{
+    font-family:"微软雅黑";
+    background-size:cover;
+    background-attachment:fixed;
+    border: none;
+}
+
+#container{
+    width: 350px;
+    height: 600px;
+    /*background-color :white;*/
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#titleArea{
+    align-items: center;
+    background: #e4e4e4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 10%;
+}
+
+#titleBlock{
+    width: 90%;
+    height: 40%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+#titleBlock p{
+    font-size: 19.5px;
+    color: #4d4d4d;
+    font-weight: 800;
+    margin-top: 5px;
+}
+
+#subtitleBlock{
+    width: 90%;
+    height: 30%;
+    margin-top: 10px;
+}
+
+#subtitleBlock p{
+    font-size: 13px;
+    color: #adadad;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+#logoArea{
+    width: 100%;
+    height: 35%;
+    display: flex;
+    flex-direction: row;
+    justify-content:center;
+    align-items: center;
+}
+
+#logoArea img{
+    width: 80%;
+    height: 100%;
+}
+
+#inputArea {
+    width: 100%;
+    height: 36%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.userInfo {
+    height: 33.3%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.input_1 {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.input_1 input{
+    padding-left: 6px;
+    margin-left: 6px;
+    width: 85%;
+    height: 40%;
+    color: black;
+    font-size: 15px;
+    display: inline-block;
+    border: 2px solid #a0a0a0;
+    border-radius: 5px;
+    outline-style: none;
+}
+
+.input_1 input:focus {
+	border: 2px solid #fb9937;      
+}
+
+.input_1 input:hover {
+	background-color: #dddddd; 
+}
+
+#registerArea {
+    height: 14%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+#registerButton {
+    width: 85%;
+    height: 60%;
+    color: white;
+    background-color: #459ff1;
+    font-size: 20px;
+    outline-style: none;
+    border-radius: 5px;
+    border: none;
+}
+
+#registerButton:hover{
+    background-color: #37bef9;
+    border: none;
+    cursor: pointer;
+}
+
+#registerButton:active{
+    background-color: #459ff1;
+}
+
+#foot{
+    width: 100%;
+    height: 5%;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+}
+
+#login{
+    width: 30%;
+    height: 100%;
+    font-size: 15px;
+    color: #959595;
+    display: flex;
+    justify-content: center;
+}
+
+#login a{
+    text-decoration: none;
+    color:  #959595;
+}
+
+#login a:hover{
+    cursor: pointer;
+    color: #fb9937;
+}
