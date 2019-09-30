@@ -14,9 +14,9 @@
   - MPT：主口令 base64
   - mode：两种模式[int] （该参数为0：不含特殊字符；1：含有特殊字符/通常为等号或者下划线或者加号）
 
-  ![1569826468382](D:\repo\test\assets\1569826468382.png)
+  ![1569826468382](assets\1569826468382.png)
 
-  ![1569826454462](D:\repo\test\assets\1569826454462.png)
+  ![1569826454462](assets\1569826454462.png)
 
 ##### divideModuleV2.js
 
@@ -38,7 +38,7 @@
 
     输出：
 
-  ![1569826562789](D:\repo\test\assets\1569826562789.png)
+  ![1569826562789](assets\1569826562789.png)
 
   
 ##### reCombineModuleV2.js
@@ -49,7 +49,7 @@ function recombine(Data,n,k,Msg)
 
 - Data：上一个模块生成的数组，类似这种格式：
 
-![1569826801289](D:\repo\test\assets\1569826801289.png) 
+![1569826801289](assets\1569826801289.png) 
 
 就是把预留信息套在一个数组就成
 
@@ -57,7 +57,7 @@ function recombine(Data,n,k,Msg)
 
   - n：主机数 k：门限数
 
-    输出：![1569826846582](D:\repo\test\assets\1569826846582.png)
+    输出：![1569826846582](assets\1569826846582.png)
 
 
 #### 注意事项：
