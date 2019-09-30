@@ -145,6 +145,7 @@ function pad(array){
 }
 
 
+
 //sm4输入输出均为字节数组形式
 //sm3支持字符形式输入或者二进制形式输入
 const random = require('../function/RandomNum');
@@ -154,7 +155,7 @@ const sm4_encrypt = require('../function/sm4_index').encrypt;
 const divideScrt = require('../function/SecretShareRS').divide;
 
 //输入均为base64可打印编码
-function divide(siteUsername,sitePassword,Msg,MP,n,k,URL){
+function divide(siteUsername,sitePassword,Msg,n,k,URL){
     const K= random(16);//字节数组形式 128b
     //console.log(K.join(""));
     const M = siteUsername+'!'+sitePassword+'!'+Msg;//加上！便于在明文中区分
@@ -184,36 +185,16 @@ function divide(siteUsername,sitePassword,Msg,MP,n,k,URL){
 
     const Data = divideScrt(Secret,n,k);//嵌套字节数组
 
-    var salt = [];
-    var Cipher  = [];
-    var key =[];
     var output = [];
 
-    var temp = [];
     for(var i =0;i<n;i++){
-        salt.push(random(32));//字节数组形式 32字节，可以直接用秘密共享输入
-        console.log(salt[i]);
-        for(var j =0;j<32;j++){
-            temp.push(salt[i][j]);
-        }
-    }
-    //console.log(temp);
-    const saltRS = divideScrt(temp,n,k);//字节数组
-   // console.log(saltRS);
-   
-
-    for(var i =0;i<n;i++){
-        //salt.push(random(32));
-        key.push(Str2Bytes(pbkdf2(MP,salt[i],16)));//产生16字节秘钥 十六进制字符串形式
-        pad(Data[i]);//sm4是ecb模式，需要填充
-        Cipher.push(sm4_encrypt(Data[i],key[i]));//字节数组形式
-        output.push(URL+'!'+Bytes2Str(saltRS[i])+'!'+Bytes2Str(Cipher[i])+'!'+sm3(Bytes2Str(saltRS[i])+Bytes2Str(Cipher[i]),0,0));
+        output.push(URL+'!'+Bytes2Str(Data[i])+'!'+sm3(Bytes2Str(Data[i]),0,0));
         //console.log(Bytes2Str(salt[i])+Bytes2Str(Cipher[i]));
         //console.log(sm3(Bytes2Str(salt[i])+Bytes2Str(Cipher[i]),0,0));
 
         /*
         最终output形式：
-        URL(base64编码形式)+salt（十六进制字符串形式）+Cipher(十六进制字符串形式)+Cipher hash（十六进制字符串）
+        URL(base64编码形式)+Cipher(十六进制字符串形式)+Cipher hash（十六进制字符串）
         因为base64字符和十六进制字符串是没有‘！’，则用！作为分界
         */ 
     }
@@ -221,7 +202,18 @@ function divide(siteUsername,sitePassword,Msg,MP,n,k,URL){
 
 }
 
-console.log(divide('tfountain#$@#','U8O1wrTCvlljw6MV','buaanb','asfshajfsagdhjkadfgahjdsjjasghdjaj',4,3,'baidu.com.local'));
+module.exports = {
+    divide(siteUsername,sitePassword,Msg,n,k,URL){
+        return divide(siteUsername,sitePassword,Msg,n,k,URL);
+    }
+}
+
+   
+
+
+//console.log(divide('tfountain#$@#','U8O1wrTCvlljw6MV','buaanb',4,3,'baidu.com.local'));
+
+
 //console.log(Base64.encode('tofunatain'));
 //console.log (Str2Bytes(binary2hex(str2binary("tofunatain"))));
 //1000101110100000001011011001000110000011011011000111010000111001111011100101011101101111100111000011110100000001010001111101101100000000110100111000110001101110111101110011101001111100111011011111010101101001010110011011001100111110111110000011001110110111

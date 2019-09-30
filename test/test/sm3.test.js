@@ -1,6 +1,6 @@
 const sm3 = require('../function/sm3_index');
 
-console.log(sm3('9612554b10840d4574e3b13abc782439',0,0));
+console.log(sm3('588acc8288185346f5d3f11a91fbbe086e4f1c0366d6d1cea1def055165b4e88e28e20e0bafb78a2aec54e6c707b01e33e2ee2f8adf6c983cfe6b4f81afd22a97490e47807f0cf15da0af47f7221feed',0,0));
 
 /*
 test('must match the result', () => {

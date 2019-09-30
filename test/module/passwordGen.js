@@ -153,26 +153,55 @@ function Bytes2Str(arr) {
     return str;
 }
 
+var excludeSpecial = function(s) {  
+    // 去掉转义字符  
+    s = s.replace(/[\'\"\\\/\b\f\n\r\t]/g, '');  
+    // 去掉特殊字符  
+    s = s.replace(/[\@\#\$\%\^\&\*\{\}\:\"\L\<\>\?]/);  
+    return s;  
+ }; 
+
+function randomRange(myMin, myMax) {
+    return Math.floor(Math.random()*(myMax - myMin + 1)) + myMin; 
+}
+
 const random = require('../function/RandomNum');
 const pbkdf2 = require("../function/improved_pbkdf2").pbkdf2;
 const sm3 = require('../function/sm3_index');
 const Base64 = require('../function/base64').Base64;
 
 //输入为base 64格式，kLen是需要的字节长度 一般在6-18字节？
-function password_gen(Site_UserName,MP,T,kLen){
+//模式1为有特殊字符 0为无
+function password_gen(Site_UserName,MP,T,mode){
+    const kLen = randomRange(6,18);
     const hashUsername = sm3(Site_UserName, 0,1);
     const t = sm3(T,0,1);
     const salt1 = binary2hex(Bytes2Str(random(32)));
     const Salt1 = Str2Bytes(binary2hex(binaryCal(salt1,hashUsername,xor)));
 
-    const P = pbkdf2(MP,Salt1,kLen);//P是字符串
+    const P = pbkdf2(MP,Salt1,20);//P是字符串
 
     const salt2 = binary2hex(Bytes2Str(random(32)));
     const Salt2 = Str2Bytes(binary2hex(binaryCal(salt2,t,xor)));
 
-    const Site_Password = pbkdf2(P,Salt2,kLen);
+    const Site_Password = pbkdf2(P,Salt2,20);
+    const base64code = Base64.encode(Byte2Ascii(Str2Bytes(Site_Password)));
 
-    return Base64.encode( Byte2Ascii(Str2Bytes(Site_Password)));
+    if(mode == 1){
+        base = base64code.substr(base64code.length-kLen,kLen-1);
+        r = randomRange(0,kLen-1);
+        return base.slice(0, r) + '_' + base.slice(r);
+    }
+    if(mode == 0){
+        basecode = excludeSpecial(base64code);
+        return basecode.substr(0,kLen);
+    }
 }//输出同样为base64
 
-//console.log(password_gen("adadad%%@#!","AA@#A3ad","12324df",8));
+module.exports = {
+    password_gen(Site_UserName,MP,T,mode){
+        return password_gen(Site_UserName,MP,T,mode);
+    }
+}
+
+//console.log(password_gen("adadad%%@#!","AA@#A3ad","12324df",1));

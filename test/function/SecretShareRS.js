@@ -75,7 +75,14 @@ function Bytes2Str(arr) {
     }
     return str;
 }
-
+/*字节转字符，只考虑ASCII编码，因为base64是可见的*/
+function Byte2Ascii(Byte){
+    let str = '';
+    for(var i = 0;i<Byte.length;i++){
+        str+=String.fromCharCode(Byte[i]);
+    }
+    return str;
+}
 
 
 
@@ -149,7 +156,7 @@ function divide(msg,n,k){
     }
     else{
         for(var i = 0;i<pad;i++)msg.unshift(0);//padding
-        var a = len/tmp;//每个服务器分到的字节数量为a
+        var a = msg.length/tmp;//每个服务器分到的字节数量为a
         var data = encode(msg,msg.length,a*(n-k));//返回一个数组
 
         var Data =[];
@@ -176,20 +183,35 @@ function reCombine(Data,n,k){
     }
     return padMsg;
 }
-
 /*
+
 var test = "tfountainlocve afajkf asfa ad";
 var Hex = Str2Bytes(binary2hex(str2binary(test)));
-console.log(Hex);
-console.log(divide(Hex,4,3));
+console.log(Hex.join(''));
+var array= divide(Hex,4,3);
+console.log(array);
+var index=[];
+for(var i=0;i<4;i++){
+    index.push (Byte2Ascii(array[i]));
+    console.log(index[i]);
+}
+index[1][2]='a';
+console.log(Str2Bytes(binary2hex(str2binary(index[1]))));
 
-var code = [ [ 0, 116, 102, 111, 117, 110, 116, 97, 105, 110, 108, 111, 99, 118 ],
-[ 101, 32, 97, 102, 97, 106, 107, 102, 32, 97, 115, 102, 97, 32, 97 ],
-[ 100, 46, 208, 6, 97, 110, 109, 218, 128, 38, 18, 73, 219, 7 ],
-[ 41, 20, 10, 55, 107, 99, 174, 159, 207, 113, 127, 66, 34, 26, 7 ] ];
+var code = [ [ 1, 116, 102, 111, 117, 110, 116, 97, 105, 110, 108, 111, 99, 118 ],
+[ 133, 122, 97, 102, 97, 106, 107, 102, 32, 97, 115, 102, 97, 32, 97 ],
+[ 100, 46, 254, 6, 97, 110, 109, 215, 128, 38, 18, 73, 219, 7 ],
+[ 41, 20, 10, 95, 107, 99, 174, 159, 207, 113, 127, 66, 34, 26, 7 ] ];
+
 var decode = reCombine(code,4,3);
-console.log(decode);
+console.log(decode.join(''));
+
+if(Hex==decode.join)console.log('true');
+const string = Byte2Ascii(decode);
+if(string == test)console.log('true');
+console.log(Byte2Ascii(decode));
 */
+
 module.exports={
     divide(msg,n,k){
         return divide(msg,n,k);

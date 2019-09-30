@@ -158,6 +158,11 @@ function unpad(array){
     for(var i =0;i<del;i++)array.shift();
 }
 
+
+
+
+
+
 //sm4输入输出均为字节数组形式
 //sm3支持字符形式输入或者二进制形式输入
 const random = require('../function/RandomNum');
@@ -177,65 +182,34 @@ function Check(Data,hash,n){//十六进制字符串形式
     return cnt;
 }
 
+
+
 //base64输入
-function recombine(MP,Data,n,k){
+function recombine(Data,n,k,Msg){
     var Salt = [];//十六进制字符串形式
     var Cipher = [];//十六进制字符串形式
     var hash = [];//十六进制字符串形式
-    var Str = [];
-
+ 
     for(var i =0;i<n;i++){
         var data = Data[i].split('!');
-        Salt.push(data[1]);
-        Cipher.push(data[2]);
-        Str.push(Salt[i]+Cipher[i]);
-       
-        //console.log(sm3(Str[i],0,0));
-       
-        hash.push(data[3]);
+        Cipher.push(data[1])
+        hash.push(data[2]);
         //console.log(hash[i]);
     }
-    check = Check(Str,hash,n,k);
+    check = Check(Cipher,hash,n,k);
 
     if(check > 0){
         console.log(check+'台服务器数据被篡改！数据可能无法恢复！');
     }
 
-    var salt = [];//字节数组形式
-    var key =[];//字节数组形式
-    var plain = [];//字节数组形式
     var cipher = [];//字节数组形式
     var W = [];
-    var temp = [];
-
-    for(var i =0;i<n;i++)temp.push(Str2Bytes(Salt[i]));//字节数组形式 32B
-    
-    const saltRs = recombSrct(temp,n,k);//字节数组形式
-    console.log(saltRs.join(''));
-    for(var i =0;i<n;i++){
-        salt.push(saltRs.slice(i*32,(i+1)*32));
-        //console.log(salt[i].join(""));
-    }
-
 
     for(var i =0;i<n;i++){
         cipher.push(Str2Bytes(Cipher[i]));//字节数组形式     
-        //console.log(cipher[i].join(''));
-        
-        key.push(Str2Bytes(pbkdf2(MP,salt[i],16)));
-        //console.log(key[i]);
-
-        plain.push(sm4_decrypt(cipher[i],key[i]));//字节数组形式
-        //console.log(plain[i].join(''));
-
-        unpad(plain[i]);
-        W.push(plain[i]);
-        
-        //console.log(W);
     }
 
-    const Secret = recombSrct(W,n,k);//字节数组形式
-    console.log(Secret.join(''));
+    const Secret = recombSrct(cipher,n,k);//字节数组形式
 
     const secret = hex2binary(Bytes2Str(Secret));//二进制形式
 
@@ -250,13 +224,27 @@ function recombine(MP,Data,n,k){
 
     const P = sm4_decrypt(Str2Bytes(binary2hex(C)),K);
     unpad(P);
-    console.log(Byte2Ascii(P));
-    return Byte2Ascii(P);
+    const p =Byte2Ascii(P).split('!');
+    const info = {
+        Site_Username :p[0],
+        Site_Password :p[1]
+    }
+    //console.log(info);
+    if(p[2]==Msg)console.log("预留信息验证成功！")
+    return info;
+    
 }
-recombine('asfshajfsagdhjkadfgahjdsjjasghdjaj',['baidu.com.local!920110cb9a2bfb67893777ca5cf7e4813624235fe017774ee56798a7d69be84d66bca26dff7009c0d3eec9431625a621ee79b1b941c4f72ba9ea407cdec60cd0!bba0b358b3fae1fd42064ca1ceff64d162d917c563120fefd81611f55808bc4214d16dbd8aa237b67587cc3c0565cb10!e838954f0936b5f8d8081a329fe11e4c9528334f793ba3cce06653e6b14bbfe2',
-'baidu.com.local!920110cb9a2bfb67893777ca5cf7e4813624235fe017774ee56798a7d69be84d66bca26dff7009c0d3eec9431625a621ee79b1b941c4f72ba9ea407cdec60cd0!bba0b358b3fae1fd42064ca1ceff64d162d917c563120fefd81611f55808bc4214d16dbd8aa237b67587cc3c0565cb10!e838954f0936b5f8d8081a329fe11e4c9528334f793ba3cce06653e6b14bbfe2',
-'baidu.com.local!26177745c4b7bfa875d6b27257fd58ba1b5f11e3827e2b62802f3366cd4e611a90a3efcf1069a6a981ed9d7a0f08d22fc4f223d4444ab7bb7832450f3df9bc4f!f49ba80c7c392e64d969324944777acab34db711eb666030f539f014be84a56a3d273892597115c328bf8fa3c9419ef8!460d0d3d5629f14cb7604adcd2b88cb4e71ce7c6929aad089153781137dfe33e',
-'baidu.com.local!2930d86fbc1158c9faeca8120e0e1bb5f0e577a4c5a0d33969f17cd678ad87732253788eeba527b652822c5c0d07f439ca021845a40f42de5d9f64de74523e67!cc020f0ab88adedef7696efe300b59a124bdd0d06f6aab262efa58fe3f40331ca4305d651d86cbff277a0c46aff86fab!555aad05b4b940104666cdf0692cce2c2d925ffb2bd3ccbf904a8b1e16e0c488' ],4,3);//21922213664822131681821112073920198205482619110322021824287154129121154116242646191111
+module.exports = {
+    recombine(Data,n,k,Msg){
+        return recombine(Data,n,k,Msg);
+    }
+}
+
+/*
+recombine([ 'baidu.com.local!58e352a0af0e242e8ec0d15b271c37a05c1b35061e43c08b66f51c39c04e1f6817ad4e3b97ac3ede!07472387a27a788e188d3dfc193df342d48ca751c2c0c2234050009c097ca3d8',
+'baidu.com.local!c7ba0416bbce8438360f1126b36585d15a5c871df7d544d0e0b233412dfee90e1517edd68a1dec33!1a40687fc3a28be3af9c0d9780293b870194467fa05a0fcdeb88187e8dcfd769',
+'baidu.com.local!2d9e70ea97ddd6771f1ae543dfca46c2aca9139b8f7892261788173f6663e70c450ef267cd1a246e!f972546b3524c244ad6e4c6d57eda043fc3d2cd2958588d048e4c76aa4e543e5',
+'baidu.com.local!f82aea18d536b4b89a6e912658a2d27f39877e8b02b7b13a1bea9e95725e301358c7978d962be259!f34979228bec06d195f03a08cfe6d93df5781d3fe1750feb012d2502992c7caf' ],4,3,'buaanb');
 /*
 [ 'baidu.com.local!d5239ae80bb709047d7c6e6244c8bca187e572935d883a81449dab3b2ffa759dab05e0f52630d7b5bc1b83c76de3ff5e50b85120105111a967d2959b5001f949!a212887a270b34f216afc90e18ece64820208355d1e6d731a8dc71958507a06a3c4f0f9ed8e868c0cb0fb3c094cc55fc!bb2694c4e558e0e0d171275260ccbe039958c63a07438a16401c2756902196ea',
 'baidu.com.local!920110cb9a2bfb67893777ca5cf7e4813624235fe017774ee56798a7d69be84d66bca26dff7009c0d3eec9431625a621ee79b1b941c4f72ba9ea407cdec60cd0!bba0b358b3fae1fd42064ca1ceff64d162d917c563120fefd81611f55808bc4214d16dbd8aa237b67587cc3c0565cb10!e838954f0936b5f8d8081a329fe11e4c9528334f793ba3cce06653e6b14bbfe2',
