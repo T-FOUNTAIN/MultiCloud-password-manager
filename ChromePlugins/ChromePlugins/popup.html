@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="css/login_v1.0.css">
+    <link rel="stylesheet" href="css/popup.css">
     <script src="js/jQuery.js"></script>
+    <script src="js/md5.js"></script>
+    <script src="js/popup.js"></script>
+    <script src="../js/sweetAlert.js"></script>
 </head>
 
 <body>
@@ -32,8 +35,9 @@
                 </div>
             </div>
             <div class="userInfo">
-                <div class="input_1">
-                    <input type="password" name="passWord"" autocomplete="off" placeholder="密码">
+                <div class="input_1" id="password_login">
+                    <input type="password" name="passWord" autocomplete="off" placeholder="口令">
+                    <img class="eye" src="img/eye.png">
                 </div>
             </div>
         </div>
@@ -42,7 +46,7 @@
         </div>
         <div id="foot">
             <div id="register">
-                <a href="html/register.html">立即注册</a>
+                <p>立即注册</p>
             </div>
         </div>
     </div>

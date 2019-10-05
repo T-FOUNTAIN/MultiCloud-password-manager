@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../css/popup.css">
+    <script src="../js/jQuery.js"></script>
+    <script src="../js/md5.js"></script>
+    <script src="../js/jquery.base64.js"></script>
+    <script src="../js/sweetAlert.js"></script>
+    <script src="../js/passwordGen.js"></script>
+    <script src="../js/divideModuleV2.js"></script>
+    <script src="../js/reCombineModuleV2.js"></script>
+    <script src="../js/background.js"></script>
+</head>
+
+<body>
+    <div id="container">
+        <div id="titleArea">
+            <div id="titleBlock">
+                <p>
+                    Multi-Cloud Password Manager
+                </p>
+            </div>
+            <div id="subtitleBlock">
+                <p>
+                    基于国密算法的多云端口令管理器
+                </p>
+            </div>
+        </div>
+        <div id="logoArea">
+            <img src="../img/logo_v1.0.5.png" />
+        </div>
+        
+        <div id="inputArea_mode">
+            <div class="userInfo_mode">
+                <input type="text", name="web_hostname" autocomplete="off" placeholder="网站主机域名">
+                <img class="get" src="../img/get.png">
+            </div>
+            <div class="userInfo_mode" id="MP_op">
+                <input type="password", name="MP_options" autocomplete="off" placeholder="主口令">
+                <img class="eye" src="../img/eye.png">
+            </div>
+            <div class="userInfo_mode">
+                <input type="text", name="web_username" autocomplete="off" placeholder="网站用户名">
+            </div>
+            <div class="userInfo_mode" id="web_pwd">
+                <input type="text", name="web_password" readonly="readonly" autocomplete="off" placeholder="网站口令">
+                <img class="write" src="../img/write.png">
+            </div>
+        </div>
+
+        <div id="ModeArea">
+            <div class="modeButtons">
+                <input type="button", id="genPassword", class="modeButton" value="生成口令">
+            </div>
+            <div class="modeButtons">
+                <input type="button", id="savePassword", class="modeButton" value="上传信息">
+            </div>
+            <div class="modeButtons">
+                <input type="button", id="getPassword", class="modeButton" value="查询信息">
+            </div>
+        </div>
+
+        <div id="ModeFoot">
+            <div id="logout">
+                <a href="#">登出</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

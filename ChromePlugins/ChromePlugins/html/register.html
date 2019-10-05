@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *;script-src * 'unsafe-inline'">
-    
-    <link rel="stylesheet" href="../css/register_v1.0.css">
+    <link rel="stylesheet" href="../css/popup.css">
     <script type="text/javascript" src="../js/jQuery.js"></script>
+    <script src="../js/md5.js"></script>
+    <script src="../js/background.js"></script>
+    <script src="../js/sweetAlert.js"></script>
+
 </head>
 
 <body>
@@ -27,32 +29,33 @@
         <div id="logoArea">
             <img src="../img/logo_v1.0.5.png" />
         </div>
-        <div id="inputArea">
-            <div class="userInfo">
-                <div class="input_1">
+        <div id="inputArea_register">
+            <div class="userInfo_register">
+                <div class="input_register">
                     <input type="text" name="userName" autocomplete="off" placeholder="用户名">
                 </div>
             </div>
-            <div class="userInfo">
-                <div class="input_1">
-                    <input type="password" name="passWord"" autocomplete="off" placeholder="密码">
+            <div class="userInfo_register">
+                <div class="input_register" id="password_register">
+                    <input type="password" name="passWord"" autocomplete="off" placeholder="口令">
+                    <img class="eye" src="../img/eye.png">
                 </div>
             </div>
-            <div class="userInfo">
-                <div class="input_1">
-                    <input type="password" name="passWord_2" autocomplete="off" placeholder="确认密码">
+            <div class="userInfo_register">
+                <div class="input_register" id="password_register">
+                    <input type="password" name="passWord_2" autocomplete="off" placeholder="确认口令">
+                    <img class="eye" src="../img/eye.png">
                 </div>
             </div>
         </div>
         <div id="registerArea">
             <input type="button" value="注 册" id="registerButton">
         </div>
-        <div id="foot">
+        <div id="foot_register">
             <div id="login">
-                <a href="../popup.html">立即登录</a>
+                <a href="#">立即登录</a>
             </div>
         </div>
     </div>
 </body>
-    <script type="text/javascript" src="../js/registerCheck.js"></script>
 </html>

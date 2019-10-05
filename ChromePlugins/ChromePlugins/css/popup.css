@@ -1,0 +1,536 @@
+@charset "utf-8";
+/* CSS Document */
+
+*{
+	margin: 0;
+	padding: 0;
+}
+
+body{
+    font-family:"微软雅黑";
+    background-size:cover;
+    background-attachment:fixed;
+    border: none;
+}
+
+#container{
+    width: 350px;
+    height: 600px;
+    /*background-color :white;*/
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#titleArea{
+    align-items: center;
+    background: #e4e4e4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 10%;
+}
+
+#titleBlock{
+    width: 90%;
+    height: 40%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+#titleBlock p{
+    font-size: 19.5px;
+    color: #4d4d4d;
+    font-weight: 800;
+    margin-top: 5px;
+}
+
+#subtitleBlock{
+    width: 90%;
+    height: 30%;
+    margin-top: 10px;
+}
+
+#subtitleBlock p{
+    font-size: 13px;
+    color: #adadad;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+#logoArea{
+    width: 100%;
+    height: 35%;
+    display: flex;
+    flex-direction: row;
+    justify-content:center;
+    align-items: center;
+}
+
+#logoArea img{
+    width: 80%;
+    height: 100%;
+    -webkit-user-drag: none;
+}
+
+#inputArea {
+    width: 100%;
+    height: 25%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.userInfo {
+    height: 50%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.input_1 {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.input_1 input{
+    padding-left: 6px;
+    margin-left: 6px;
+    width: 85%;
+    height: 40%;
+    color: black;
+    font-size: 15px;
+    display: inline-block;
+    border: 2px solid #a0a0a0;
+    border-radius: 5px;
+    outline-style: none;
+}
+
+.input_1 input:focus {
+	border: 2px solid #fb9937;      
+}
+
+.input_1 input:hover {
+	background-color: #dddddd; 
+}
+
+#loginArea {
+    height: 20%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#loginButton {
+    width: 85%;
+    height: 40%;
+    color: white;
+    background-color: #459ff1;
+    font-size: 20px;
+    outline-style: none;
+    border-radius: 5px;
+    border: none;
+}
+
+#loginButton:hover{
+    background-color: #37bef9;
+    border: none;
+    cursor: pointer;
+}
+
+#loginButton:active{
+    background-color: #459ff1;
+}
+
+#foot{
+    width: 100%;
+    height: 10%;
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+#register{
+    width:20%;
+    height: 30%;
+    margin-right: 18px;
+    font-size: 15px;
+    color: #959595;
+}
+
+#register p{
+    text-decoration: none;
+    color:  #959595;
+}
+
+#register p:hover{
+    cursor: pointer;
+    color: #fb9937;
+}
+
+#inputArea_register {
+    width: 100%;
+    height: 36%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.userInfo_register {
+    height: 33.3%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.input_register {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.input_register input{
+    padding-left: 6px;
+    margin-left: 6px;
+    width: 85%;
+    height: 40%;
+    color: black;
+    font-size: 15px;
+    display: inline-block;
+    border: 2px solid #a0a0a0;
+    border-radius: 5px;
+    outline-style: none;
+}
+
+.input_register input:focus {
+	border: 2px solid #fb9937;      
+}
+
+.input_register input:hover {
+	background-color: #dddddd; 
+}
+
+#registerArea {
+    height: 14%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+#registerButton {
+    width: 85%;
+    height: 60%;
+    color: white;
+    background-color: #459ff1;
+    font-size: 20px;
+    outline-style: none;
+    border-radius: 5px;
+    border: none;
+}
+
+#registerButton:hover{
+    background-color: #37bef9;
+    border: none;
+    cursor: pointer;
+}
+
+#registerButton:active{
+    background-color: #459ff1;
+}
+
+#foot_register {
+    width: 100%;
+    height: 5%;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+}
+
+#login{
+    width: 30%;
+    height: 100%;
+    font-size: 15px;
+    color: #959595;
+    display: flex;
+    justify-content: center;
+}
+
+#login a{
+    text-decoration: none;
+    color:  #959595;
+}
+
+#login a:hover{
+    cursor: pointer;
+    color: #fb9937;
+}
+
+.errorTip{
+    font-size: 12px;
+    color: red;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.successTip{
+    font-size: 15px;
+    color: #2f9f32;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+#mpArea {
+    height: 25%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.eye{
+    position: absolute;
+    height: 2.5%;
+    right: 25px;
+    cursor: pointer;
+    -webkit-user-drag: none;
+}
+
+.eye:active {
+    height: 3%;
+}
+
+#mpButton {
+    width: 85%;
+    height: 40%;
+    color: white;
+    background-color: #459ff1;
+    font-size: 20px;
+    outline-style: none;
+    border-radius: 5px;
+    border: none;
+}
+
+#mpButton:hover{
+    background-color: #37bef9;
+    border: none;
+    cursor: pointer;
+}
+
+#mpButton:active{
+    background-color: #459ff1;
+}
+
+#mpConfirm {
+    height: 20%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#mpFoot {
+    width: 100%;
+    height: 10%;
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+#MPintro{
+    width: 40%;
+    height: 30%;
+    margin-right: -16px;
+    font-size: 15px;
+    color: #959595;
+}
+
+#MPintro p{
+    text-decoration: none;
+    color:  #959595;
+}
+
+#MPintro p:hover{
+    cursor: pointer;
+    color: #fb9937;
+}
+
+#inputArea_mode{
+    width: 100%;
+    height: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.userInfo_mode {
+    width: 100%;
+    height: 25%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.userInfo_mode input{
+    padding-left: 6px;
+    margin-left: 6px;
+    width: 85%;
+    height: 60%;
+    color: black;
+    font-size: 15px;
+    display: inline-block;
+    border: 2px solid #a0a0a0;
+    border-radius: 5px;
+    outline-style: none;
+}
+
+.userInfo_mode input:focus {
+	border: 2px solid #fb9937;      
+}
+
+.userInfo_mode input:hover {
+	background-color: #dddddd; 
+}
+
+#web_pwd input{
+	background-color: #dddddd; 
+}
+
+#ModeArea {
+    width: 100%;
+    height: 12%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.modeButtons {
+    width: 33.3%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-top:-10px;
+}
+
+.modeButton {
+    width: 70%;
+    height: 60%;
+    color: white;
+    background-color: #459ff1;
+    font-size: 17px;
+    outline-style: none;
+    border-radius: 5px;
+    border: none;
+}
+
+.modeButton:hover{
+    background-color: #37bef9;
+    border: none;
+    cursor: pointer;
+}
+
+.modeButton:active{
+    background-color: #459ff1;
+}
+
+#genPassword {
+    margin-left: 20px;
+}
+
+#getPassword {
+    margin-right: 20px;
+}
+
+#ModeFoot {
+    width: 100%;
+    height: 2%;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    margin-top:-5px;
+}
+
+#logout{
+    width: 30%;
+    height: 100%;
+    font-size: 13px;
+    color: #959595;
+    display: flex;
+    flex-direction:row-reverse;
+    align-items: center;
+    margin-right: 30px;
+}
+
+#logout a{
+    text-decoration: none;
+    color:  #959595;
+}
+
+#logout a:hover{
+    cursor: pointer;
+    color: #fb9937;
+}
+
+.get{
+    position: absolute;
+    height: 3%;
+    right: 30px;
+    cursor: pointer;
+    -webkit-user-drag: none;
+}
+
+.get:hover{
+    position: absolute;
+    height: 4%;
+    right: 30px;
+    cursor: pointer;
+    -webkit-user-drag: none;
+}
+
+.write{
+    position: absolute;
+    height: 3%;
+    right: 30px;
+    cursor: pointer;
+    -webkit-user-drag: none;
+}
+
+.write:hover{
+    position: absolute;
+    height: 4%;
+    right: 30px;
+    cursor: pointer;
+    -webkit-user-drag: none;
+}
+
+.loading{
+    position: absolute;
+    top: 200px;
+    right:10px;
+}
+.loading img{
+    height: 200px;
+}
+

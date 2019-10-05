@@ -23390,15 +23390,15 @@ function randomRange(myMin, myMax) {
     return Math.floor(Math.random()*(myMax - myMin + 1)) + myMin; 
 }
 
-const random = require('../function/RandomNum');
-const pbkdf2 = require("../function/improved_pbkdf2").pbkdf2;
-const sm3 = require('../function/sm3_index');
-const Base64 = require('../function/base64').Base64;
+window.random = require('../function/RandomNum');
+window.pbkdf2 = require("../function/improved_pbkdf2").pbkdf2;
+window.sm3 = require('../function/sm3_index');
+window.Base64 = require('../function/base64').Base64;
 
-//输入为base 64格式，kLen是需要的字节长度 一般在6-18字节？
+//输入为base 64格式，kLen是需要的字节长度 一般在12-18字节？
 //模式1为有特殊字符 0为无
-function password_gen(Site_UserName,MP,T,mode){
-    const kLen = randomRange(6,18);
+window.password_gen = function(Site_UserName,MP,T,mode){
+    const kLen = randomRange(12,18);
     const hashUsername = sm3(Site_UserName, 0,1);
     const t = sm3(T,0,1);
     const salt1 = binary2hex(Bytes2Str(random(32)));

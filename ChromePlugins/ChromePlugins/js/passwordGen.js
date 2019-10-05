@@ -22509,262 +22509,237 @@ module.exports = function(Klen){
 }
 
 },{"crypto":55}],157:[function(require,module,exports){
-// running on node.js
-/**
- * 左补0到指定长度
- */
-function leftPad(input, num) {
-    if (input.length >= num) return input;
-
-    return (new Array(num - input.length + 1)).join('0') + input
-}
-
-/**
- * 二进制转化为十六进制
- */
-function binary2hex(binary) {
-    const binaryLength = 8;
-    let hex = '';
-    for (let i = 0; i < binary.length / binaryLength; i++) {
-        hex += leftPad(parseInt(binary.substr(i * binaryLength, binaryLength), 2).toString(16), 2);
-    }
-    return hex;
-}
-
-/**
- * 十六进制转化为二进制
- */
-function hex2binary(hex) {
-    const hexLength = 2;
-    let binary = '';
-    for (let i = 0; i < hex.length / hexLength; i++) {
-        binary += leftPad(parseInt(hex.substr(i * hexLength, hexLength), 16).toString(2), 8);
-    }
-    return binary;
-}
-
-/**
- * 普通字符串转化为二进制
- */
-function str2binary(str) {
-    let binary = '';
-    for (const ch of str) {
-        binary += leftPad(ch.codePointAt(0).toString(2), 8);
-    }
-    return binary;
-}
-//十六进制字符串转字节数组
-function Str2Bytes(str) {
-    var pos = 0;
-    var len = str.length
-    if (len % 2 != 0) {
-        return null;
-    }
-
-    len /= 2;
-    var hexA = new Array();
-
-    for (var i = 0; i < len; i++) {
-        var s = str.substr(pos, 2);
-        var v = parseInt(s, 16);
-        hexA.push(v);
-        pos += 2;
-    }
-    return hexA;
-}
- 
-//字节数组转十六进制字符串
- 
-function Bytes2Str(arr) {
-    var str = "";
-    for (var i = 0; i < arr.length; i++) {
-        var tmp = arr[i].toString(16);
-        if (tmp.length == 1) {
-            tmp = "0" + tmp;
-        }
-        str += tmp;
-    }
-    return str;
-}
-/*字节转字符，只考虑ASCII编码，因为base64是可见的*/
-function Byte2Ascii(Byte){
-    let str = '';
-    for(var i = 0;i<Byte.length;i++){
-        str+=String.fromCharCode(Byte[i]);
-    }
-    return str;
-}
-
-
-
-
-
-
-var rs = require('./reedsolomon');
-
-function RS(messageLength, errorCorrectionLength) {
-	var dataLength = messageLength - errorCorrectionLength;
-	var encoder = new rs.ReedSolomonEncoder(rs.GenericGF.AZTEC_DATA_8());
-	var decoder = new rs.ReedSolomonDecoder(rs.GenericGF.AZTEC_DATA_8());
-	return {
-		dataLength: dataLength,
-		messageLength: messageLength,
-		errorCorrectionLength: errorCorrectionLength,
-
-		encode : function (message) {
-			encoder.encode(message, errorCorrectionLength);
-		},
-
-		decode: function (message) {
-			decoder.decode(message, errorCorrectionLength);
-		}
-	};
-}
-
-//容许差错数是差错校验位的1/2
-
-//msg字节数组形式输入
-//以字节数组形式输出
-function encode(msg,msgLength,allowErrLength){
-    var ec = RS(msgLength+allowErrLength*2,allowErrLength*2);
-    var message = new Int32Array(ec.messageLength);
-    for(var i=0;i<ec.dataLength;i++)message[i]=msg[i];
-
-    var res = [];
- 
-   /* 
-    console.log('raw data');
-    console.log(Array.prototype.join.call(message));
-    */
-    ec.encode(message);
-    for(var i =0;i<ec.messageLength;i++)res[i]=message[i];
-
-    return res;
-}
-//以字节数组形式输入，以字节数组形式输出
-function decode(code,msgLength,allowErrLength){
-    var ec = RS(msgLength+allowErrLength*2,allowErrLength*2);
-
-    var Code = new Int32Array(ec.messageLength);
-    for(var i=0;i<ec.messageLength;i++)Code[i]=code[i];
-    ec.decode(Code);
-
-    var res=[];
-    for(var i=0;i<msgLength;i++)res[i]=Code[i];
-    return res;
-
-    
-}
-
-//服务器总数n  门限值为k 秘密msg以字节形式数组存储
-function divide(msg,n,k){
-    const tmp = 2*k-n;
-    const len = msg.length;
-    const pad = (tmp-(len%tmp))%tmp;
-    if(tmp<=0){
-        console.assert("you need a larger k!");
-        return;
-    }
-    else{
-        for(var i = 0;i<pad;i++)msg.unshift(0);//padding
-        var a = msg.length/tmp;//每个服务器分到的字节数量为a
-        var data = encode(msg,msg.length,a*(n-k));//返回一个数组
-
-        var Data =[];
-        for(var i=0;i<n;i++){
-            Data[i] = data.slice(i*a,(i+1)*a);
-        }
-        return Data;
-    }
-}
-
-function reCombine(Data,n,k){
-    var data=[];//将数据拆分
-    for(var i =0;i<n;i++)data.push(Data[i]);
-    const a = data[0].length;
-
-    var code=[];
-    for(var i = 0;i<n;i++)code=code.concat(data[i]);
-
-    var padMsg = decode(code,code.length,a*(n-k));
-    padMsg = padMsg.slice(0,padMsg.length-2*a*(n-k));    
-
-    while(padMsg[0]==0){
-        padMsg.shift();
-    }
-    return padMsg;
-}
+(function (global){
 /*
-
-var test = "tfountainlocve afajkf asfa ad";
-var Hex = Str2Bytes(binary2hex(str2binary(test)));
-console.log(Hex.join(''));
-var array= divide(Hex,4,3);
-console.log(array);
-var index=[];
-for(var i=0;i<4;i++){
-    index.push (Byte2Ascii(array[i]));
-    console.log(index[i]);
-}
-index[1][2]='a';
-console.log(Str2Bytes(binary2hex(str2binary(index[1]))));
-
-var code = [ [ 1, 116, 102, 111, 117, 110, 116, 97, 105, 110, 108, 111, 99, 118 ],
-[ 133, 122, 97, 102, 97, 106, 107, 102, 32, 97, 115, 102, 97, 32, 97 ],
-[ 100, 46, 254, 6, 97, 110, 109, 215, 128, 38, 18, 73, 219, 7 ],
-[ 41, 20, 10, 95, 107, 99, 174, 159, 207, 113, 127, 66, 34, 26, 7 ] ];
-
-var decode = reCombine(code,4,3);
-console.log(decode.join(''));
-
-if(Hex==decode.join)console.log('true');
-const string = Byte2Ascii(decode);
-if(string == test)console.log('true');
-console.log(Byte2Ascii(decode));
-*/
-
-module.exports={
-    divide(msg,n,k){
-        return divide(msg,n,k);
-    },
-    reCombine(code,n,k){
-        return reCombine(code,n,k);
+ *  base64.js
+ *
+ *  Licensed under the BSD 3-Clause License.
+ *    http://opensource.org/licenses/BSD-3-Clause
+ *
+ *  References:
+ *    http://en.wikipedia.org/wiki/Base64
+ */
+;(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined'
+        ? module.exports = factory(global)
+        : typeof define === 'function' && define.amd
+        ? define(factory) : factory(global)
+}((
+    typeof self !== 'undefined' ? self
+        : typeof window !== 'undefined' ? window
+        : typeof global !== 'undefined' ? global
+: this
+), function(global) {
+    'use strict';
+    // existing version for noConflict()
+    global = global || {};
+    var _Base64 = global.Base64;
+    var version = "2.5.1";
+    // if node.js and NOT React Native, we use Buffer
+    var buffer;
+    if (typeof module !== 'undefined' && module.exports) {
+        try {
+            buffer = eval("require('buffer').Buffer");
+        } catch (err) {
+            buffer = undefined;
+        }
     }
-};
-
-//var res = String.fromCharCode.apply( null , arr );(null,hex2binary(Bytes2Str(decode)));
-//console.log(res);
-
-
-
-/*
-var ec = RS(32, 8);
-var message = new Int32Array(ec.messageLength);
-for (var i = 0; i < ec.dataLength; i++) message[i] = i;
-
-console.log('raw data');
-console.log(Array.prototype.join.call(message));
-//=> 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,0,0,0,0,0,0,0,0
-
-ec.encode(message);
-//console.log(message);
-
-console.log('rs coded');
-console.log(Array.prototype.join.call(message));
-//=> 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,180,183,0,112,111,203,47,126
-
-console.log('corrupted');
-for (var i = 0; i < 5; i++) message[ Math.floor(Math.random() * message.length) ] = 0xff;
-console.log(Array.prototype.join.call(message));
-//=> 0,1,2,3,4,255,6,7,8,9,10,11,12,13,14,15,255,17,18,19,20,21,22,23,255,183,255,112,111,203,47,126
-
-ec.decode(message);
-
-console.log('rs decoded');
-console.log(Array.prototype.join.call(message));
-//=> 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,180,183,0,112,111,203,47,126
-*/
-},{"./reedsolomon":159}],158:[function(require,module,exports){
+    // constants
+    var b64chars
+        = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    var b64tab = function(bin) {
+        var t = {};
+        for (var i = 0, l = bin.length; i < l; i++) t[bin.charAt(i)] = i;
+        return t;
+    }(b64chars);
+    var fromCharCode = String.fromCharCode;
+    // encoder stuff
+    var cb_utob = function(c) {
+        if (c.length < 2) {
+            var cc = c.charCodeAt(0);
+            return cc < 0x80 ? c
+                : cc < 0x800 ? (fromCharCode(0xc0 | (cc >>> 6))
+                                + fromCharCode(0x80 | (cc & 0x3f)))
+                : (fromCharCode(0xe0 | ((cc >>> 12) & 0x0f))
+                    + fromCharCode(0x80 | ((cc >>>  6) & 0x3f))
+                    + fromCharCode(0x80 | ( cc         & 0x3f)));
+        } else {
+            var cc = 0x10000
+                + (c.charCodeAt(0) - 0xD800) * 0x400
+                + (c.charCodeAt(1) - 0xDC00);
+            return (fromCharCode(0xf0 | ((cc >>> 18) & 0x07))
+                    + fromCharCode(0x80 | ((cc >>> 12) & 0x3f))
+                    + fromCharCode(0x80 | ((cc >>>  6) & 0x3f))
+                    + fromCharCode(0x80 | ( cc         & 0x3f)));
+        }
+    };
+    var re_utob = /[\uD800-\uDBFF][\uDC00-\uDFFFF]|[^\x00-\x7F]/g;
+    var utob = function(u) {
+        return u.replace(re_utob, cb_utob);
+    };
+    var cb_encode = function(ccc) {
+        var padlen = [0, 2, 1][ccc.length % 3],
+        ord = ccc.charCodeAt(0) << 16
+            | ((ccc.length > 1 ? ccc.charCodeAt(1) : 0) << 8)
+            | ((ccc.length > 2 ? ccc.charCodeAt(2) : 0)),
+        chars = [
+            b64chars.charAt( ord >>> 18),
+            b64chars.charAt((ord >>> 12) & 63),
+            padlen >= 2 ? '=' : b64chars.charAt((ord >>> 6) & 63),
+            padlen >= 1 ? '=' : b64chars.charAt(ord & 63)
+        ];
+        return chars.join('');
+    };
+    var btoa = global.btoa ? function(b) {
+        return global.btoa(b);
+    } : function(b) {
+        return b.replace(/[\s\S]{1,3}/g, cb_encode);
+    };
+    var _encode = function(u) {
+        const isUint8Array = Object.prototype.toString.call(u) === '[object Uint8Array]';
+        return isUint8Array ? u.toString('base64')
+            : btoa(utob(String(u)));
+    }
+    var encode = function(u, urisafe) {
+        return !urisafe
+            ? _encode(u)
+            : _encode(String(u)).replace(/[+\/]/g, function(m0) {
+                return m0 == '+' ? '-' : '_';
+            }).replace(/=/g, '');
+    };
+    var encodeURI = function(u) { return encode(u, true) };
+    // decoder stuff
+    var re_btou = new RegExp([
+        '[\xC0-\xDF][\x80-\xBF]',
+        '[\xE0-\xEF][\x80-\xBF]{2}',
+        '[\xF0-\xF7][\x80-\xBF]{3}'
+    ].join('|'), 'g');
+    var cb_btou = function(cccc) {
+        switch(cccc.length) {
+        case 4:
+            var cp = ((0x07 & cccc.charCodeAt(0)) << 18)
+                |    ((0x3f & cccc.charCodeAt(1)) << 12)
+                |    ((0x3f & cccc.charCodeAt(2)) <<  6)
+                |     (0x3f & cccc.charCodeAt(3)),
+            offset = cp - 0x10000;
+            return (fromCharCode((offset  >>> 10) + 0xD800)
+                    + fromCharCode((offset & 0x3FF) + 0xDC00));
+        case 3:
+            return fromCharCode(
+                ((0x0f & cccc.charCodeAt(0)) << 12)
+                    | ((0x3f & cccc.charCodeAt(1)) << 6)
+                    |  (0x3f & cccc.charCodeAt(2))
+            );
+        default:
+            return  fromCharCode(
+                ((0x1f & cccc.charCodeAt(0)) << 6)
+                    |  (0x3f & cccc.charCodeAt(1))
+            );
+        }
+    };
+    var btou = function(b) {
+        return b.replace(re_btou, cb_btou);
+    };
+    var cb_decode = function(cccc) {
+        var len = cccc.length,
+        padlen = len % 4,
+        n = (len > 0 ? b64tab[cccc.charAt(0)] << 18 : 0)
+            | (len > 1 ? b64tab[cccc.charAt(1)] << 12 : 0)
+            | (len > 2 ? b64tab[cccc.charAt(2)] <<  6 : 0)
+            | (len > 3 ? b64tab[cccc.charAt(3)]       : 0),
+        chars = [
+            fromCharCode( n >>> 16),
+            fromCharCode((n >>>  8) & 0xff),
+            fromCharCode( n         & 0xff)
+        ];
+        chars.length -= [0, 0, 2, 1][padlen];
+        return chars.join('');
+    };
+    var _atob = global.atob ? function(a) {
+        return global.atob(a);
+    } : function(a){
+        return a.replace(/\S{1,4}/g, cb_decode);
+    };
+    var atob = function(a) {
+        return _atob(String(a).replace(/[^A-Za-z0-9\+\/]/g, ''));
+    };
+    var _decode = buffer ?
+        buffer.from && Uint8Array && buffer.from !== Uint8Array.from
+        ? function(a) {
+            return (a.constructor === buffer.constructor
+                    ? a : buffer.from(a, 'base64')).toString();
+        }
+        : function(a) {
+            return (a.constructor === buffer.constructor
+                    ? a : new buffer(a, 'base64')).toString();
+        }
+        : function(a) { return btou(_atob(a)) };
+    var decode = function(a){
+        return _decode(
+            String(a).replace(/[-_]/g, function(m0) { return m0 == '-' ? '+' : '/' })
+                .replace(/[^A-Za-z0-9\+\/]/g, '')
+        );
+    };
+    var noConflict = function() {
+        var Base64 = global.Base64;
+        global.Base64 = _Base64;
+        return Base64;
+    };
+    // export Base64
+    global.Base64 = {
+        VERSION: version,
+        atob: atob,
+        btoa: btoa,
+        fromBase64: decode,
+        toBase64: encode,
+        utob: utob,
+        encode: encode,
+        encodeURI: encodeURI,
+        btou: btou,
+        decode: decode,
+        noConflict: noConflict,
+        __buffer__: buffer
+    };
+    // if ES5 is available, make Base64.extendString() available
+    if (typeof Object.defineProperty === 'function') {
+        var noEnum = function(v){
+            return {value:v,enumerable:false,writable:true,configurable:true};
+        };
+        global.Base64.extendString = function () {
+            Object.defineProperty(
+                String.prototype, 'fromBase64', noEnum(function () {
+                    return decode(this)
+                }));
+            Object.defineProperty(
+                String.prototype, 'toBase64', noEnum(function (urisafe) {
+                    return encode(this, urisafe)
+                }));
+            Object.defineProperty(
+                String.prototype, 'toBase64URI', noEnum(function () {
+                    return encode(this, true)
+                }));
+        };
+    }
+    //
+    // export Base64 to the namespace
+    //
+    if (global['Meteor']) { // Meteor.js
+        Base64 = global.Base64;
+    }
+    // module.exports and AMD are mutually exclusive.
+    // module.exports has precedence.
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports.Base64 = global.Base64;
+    }
+    else if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([], function(){ return global.Base64 });
+    }
+    // that's it!
+    return {Base64: global.Base64}
+}));
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],158:[function(require,module,exports){
 /**
  * 左补0到指定长度 输入为二进制字符串 输出为字符串
  */
@@ -23006,537 +22981,7 @@ module.exports= {
        return PBKDF2(Pwd,salt,200,Klen);
    }
 };
-},{"../function/sm3_index":160,"./RandomNum":156}],159:[function(require,module,exports){
-/*#!/usr/bin/env node
- * Original implementation is ZXing and ported to JavaScript by cho45.
- * Copyright 2007 ZXing authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var GenericGF = function () { this.init.apply(this, arguments) };
-GenericGF.prototype = {
-	init : function (primitive, size, b) {
-		this.primitive = primitive;
-		this.size = size;
-		this.generatorBase = b;
-
-		this.expTable = new Int32Array(size);
-		this.logTable = new Int32Array(size);
-
-		var x = 1;
-		for (var i = 0; i < size; i++) {
-			this.expTable[i] = x;
-			x *= 2; // we're assuming the generator alpha is 2
-			if (x >= size) {
-				x ^= primitive;
-				x &= size-1;
-			}
-		}
-		for (var i = 0; i < size-1; i++) {
-			this.logTable[this.expTable[i]] = i;
-		}
-		// logTable[0] == 0 but this should never be used
-
-		this.zero = new GenericGFPoly(this, GenericGFPoly.COEFFICIENTS_ZERO);
-		this.one = new GenericGFPoly(this, GenericGFPoly.COEFFICIENTS_ONE);
-	},
-
-	buildMonomial : function (degree, coefficient) {
-		if (degree < 0) {
-			throw new Error("IllegalArgumentException()");
-		}
-		if (coefficient === 0) {
-			return this.zero;
-		}
-		var coefficients = new Int32Array(degree + 1);
-		coefficients[0] = coefficient;
-		return new GenericGFPoly(this, coefficients);
-	},
-
-	getZero : function () {
-		return this.zero;
-	},
-
-	getOne : function () {
-		return this.one;
-	},
-
-	exp : function (a) {
-		return this.expTable[a];
-	},
-
-	log : function (a) {
-		if (a === 0) {
-			throw new Error("IllegalArgumentException()");
-		}
-		return this.logTable[a];
-	},
-
-	inverse: function (a) {
-		if (a === 0) {
-			throw new Error("ArithmeticException()");
-		}
-		return this.expTable[this.size - this.logTable[a] - 1];
-	},
-
-	multiply: function (a, b) {
-		if (a === 0 || b === 0) {
-			return 0;
-		}
-		return this.expTable[(this.logTable[a] + this.logTable[b]) % (this.size - 1)];
-	},
-
-	getSize : function () {
-		return this.size;
-	},
-
-	getGeneratorBase : function () {
-		return this.generatorBase;
-	},
-
-	toString: function () {
-		return "GF(0x" + this.primitive.toString(16) + ',' + this.size + ')';
-	}
-};
-GenericGF.addOrSubtract = function (a, b) { return a ^ b };
-
-var GenericGFPoly = function () { this.init.apply(this, arguments) };
-GenericGFPoly.prototype = {
-	init : function (field, coefficients) {
-		if (coefficients.length === 0) {
-			throw new Error("IllegalArgumentException()");
-		}
-		this.field = field;
-		var coefficientsLength = coefficients.length;
-		if (coefficientsLength > 1 && coefficients[0] === 0) {
-			// Leading term must be non-zero for anything except the constant polynomial "0"
-			var firstNonZero = 1;
-			while (firstNonZero < coefficientsLength && coefficients[firstNonZero] === 0) {
-				firstNonZero++;
-			}
-			if (firstNonZero == coefficientsLength) {
-				this.coefficients = GenericGFPoly.COEFFICIENTS_ZERO;
-			} else {
-				this.coefficients = coefficients.subarray(firstNonZero, coefficientsLength);
-			}
-		} else {
-			this.coefficients = coefficients;
-		}
-		this.degree = this.coefficients.length - 1;
-	},
-
-	getCoefficients : function () {
-		return this.coefficients;
-	},
-
-	getDegree : function () {
-		return this.degree;
-	},
-
-	isZero : function () {
-		return this.coefficients[0] === 0;
-	},
-
-	getCoefficient : function (degree) {
-		return this.coefficients[this.coefficients.length - 1 - degree];
-	},
-
-	evaluateAt : function (a) {
-		if (a === 0) {
-			// Just return the x^0 coefficient
-			return this.getCoefficient(0);
-		}
-		var coefficients = this.coefficients;
-		var size = coefficients.length;
-		var result;
-		if (a == 1) {
-			// Just the sum of the coefficients
-			result = 0;
-			for (var i = 0, len = coefficients.length; i < len; i++) {
-				result = GenericGF.addOrSubtract(result, coefficients[i]);
-			}
-			return result;
-		}
-
-		result = coefficients[0];
-		for (var i = 1; i < size; i++) {
-			result = GenericGF.addOrSubtract(this.field.multiply(a, result), coefficients[i]);
-		}
-		return result;
-	},
-
-	addOrSubtract : function (other, buf) {
-		if (this.field !== other.field) {
-			throw new Error('IllegalArgumentException("GenericGFPolys do not have same GenericGF field")');
-		}
-		if (this.isZero()) {
-			return other;
-		}
-		if (other.isZero()) {
-			return this;
-		}
-
-		var smallerCoefficients = this.coefficients;
-		var largerCoefficients = other.coefficients;
-		if (smallerCoefficients.length > largerCoefficients.length) {
-			var temp = smallerCoefficients;
-			smallerCoefficients = largerCoefficients;
-			largerCoefficients = temp;
-		}
-		var sumDiff = buf ? buf.subarray(0, largerCoefficients.length) : new Int32Array(largerCoefficients.length);
-		var lengthDiff = largerCoefficients.length - smallerCoefficients.length;
-		for (var i = lengthDiff; i < largerCoefficients.length; i++) {
-			sumDiff[i] = GenericGF.addOrSubtract(smallerCoefficients[i - lengthDiff], largerCoefficients[i]);
-		}
-		// Copy high-order terms only found in higher-degree polynomial's coefficients
-		sumDiff.set(largerCoefficients.subarray(0, lengthDiff));
-
-		return new GenericGFPoly(this.field, sumDiff);
-	},
-
-	multiply : function (other) {
-		if (other instanceof GenericGFPoly) {
-			return this.multiplyGenericGFPoly(other);
-		} else {
-			return this.multiplyScalar(other);
-		}
-	},
-
-	multiplyGenericGFPoly : function (other) {
-		if (this.field !== other.field) {
-			throw new Error('IllegalArgumentException("GenericGFPolys do not have same GenericGF field")');
-		}
-		if (this.isZero() || other.isZero()) {
-			return this.field.zero;
-		}
-		var aCoefficients = this.coefficients;
-		var aLength = aCoefficients.length;
-		var bCoefficients = other.coefficients;
-		var bLength = bCoefficients.length;
-		var product = new Int32Array(aLength + bLength - 1);
-		for (var i = 0; i < aLength; i++) {
-			var aCoeff = aCoefficients[i];
-			for (var j = 0; j < bLength; j++) {
-				product[i + j] = GenericGF.addOrSubtract(product[i + j], this.field.multiply(aCoeff, bCoefficients[j]));
-			}
-		}
-		return new GenericGFPoly(this.field, product);
-	},
-
-	multiplyScalar : function (scalar) {
-		if (scalar === 0) {
-			return this.field.zero;
-		}
-		if (scalar == 1) {
-			return this;
-		}
-		var size = this.coefficients.length;
-		var product = new Int32Array(size);
-		for (var i = 0; i < size; i++) {
-			product[i] = this.field.multiply(this.coefficients[i], scalar);
-		}
-		return new GenericGFPoly(this.field, product);
-	},
-
-	multiplyByMonomial : function (degree, coefficient) {
-		if (degree < 0) {
-			throw new Error('IllegalArgumentException()');
-		}
-		if (coefficient === 0) {
-			return this.field.zero;
-		}
-		var size = this.coefficients.length;
-		var product = new Int32Array(size + degree);
-		for (var i = 0; i < size; i++) {
-			product[i] = this.field.multiply(this.coefficients[i], coefficient);
-		}
-		return new GenericGFPoly(this.field, product);
-	},
-
-	divide : function (other) {
-		if (this.field !== other.field) {
-			throw new Error('IllegalArgumentException("GenericGFPolys do not have same GenericGF field")');
-		}
-		if (other.isZero()) {
-			throw new Error('IllegalArgumentException("Divide by 0")');
-		}
-
-		var quotient = this.field.getZero();
-		var remainder = this;
- 
-		var denominatorLeadingTerm = other.getCoefficient(other.degree);
-		var inverseDenominatorLeadingTerm = this.field.inverse(denominatorLeadingTerm);
-
-		while (remainder.degree >= other.degree && !remainder.isZero()) {
-			var degreeDifference = remainder.degree - other.degree;
-			var scale = this.field.multiply(remainder.getCoefficient(remainder.degree), inverseDenominatorLeadingTerm);
-			var term = other.multiplyByMonomial(degreeDifference, scale);
-			var iterationQuotient = this.field.buildMonomial(degreeDifference, scale);
-			quotient = quotient.addOrSubtract(iterationQuotient, quotient.coefficients);
-			remainder = remainder.addOrSubtract(term, remainder.coefficients);
-		}
-
-		return [ quotient, remainder ];
-	},
-
-	toString : function () {
-		var result = '';
-		for (var degree = this.degree; degree >= 0; degree--) {
-			var coefficient = this.getCoefficient(degree);
-			if (coefficient !== 0) {
-				if (coefficient < 0) {
-					result += " - ";
-					coefficient = -coefficient;
-				} else {
-					if (result.length > 0) {
-						result += " + ";
-					}
-				}
-				if (degree === 0 || coefficient != 1) {
-					var alphaPower = this.field.log(coefficient);
-					if (alphaPower === 0) {
-						result += '1';
-					} else if (alphaPower == 1) {
-						result += 'a';
-					} else {
-						result += "a^";
-						result += alphaPower;
-					}
-				}
-				if (degree !== 0) {
-					if (degree == 1) {
-						result += 'x';
-					} else {
-						result += "x^";
-						result += degree;
-					}
-				}
-			}
-		}
-		return result.toString();
-	}
-};
-GenericGFPoly.COEFFICIENTS_ZERO = new Int32Array([ 0 ]);
-GenericGFPoly.COEFFICIENTS_ONE  = new Int32Array([ 1 ]);
-
-var ReedSolomonEncoder = function () { this.init.apply(this, arguments) };
-ReedSolomonEncoder.prototype = {
-	init : function (field) {
-		this.field = field;
-		this.cachedGenerators = [];
-		this.cachedGenerators.push(new GenericGFPoly(field, new Int32Array([1])));
-	},
-
-	buildGenerator : function (degree) {
-		if (degree >= this.cachedGenerators.length) {
-			var lastGenerator = this.cachedGenerators[this.cachedGenerators.length - 1];
-			for (var d = this.cachedGenerators.length; d <= degree; d++) {
-				var nextGenerator = lastGenerator.multiply(new GenericGFPoly(this.field, new Int32Array([ 1, this.field.exp(d - 1 + this.field.generatorBase) ]) ));
-				this.cachedGenerators.push(nextGenerator);
-				lastGenerator = nextGenerator;
-			}
-		}
-		return this.cachedGenerators[degree];
-	},
-
-	encode : function (toEncode, ecBytes) {
-		if (ecBytes === 0) {
-			throw new Error('IllegalArgumentException("No error correction bytes")');
-		}
-		var dataBytes = toEncode.length - ecBytes;
-		if (dataBytes <= 0) {
-			throw new Error('IllegalArgumentException("No data bytes provided")');
-		}
-		var generator = this.buildGenerator(ecBytes);
-		var infoCoefficients = new Int32Array(dataBytes);
-		infoCoefficients.set(toEncode.subarray(0, dataBytes));
-
-		var info = new GenericGFPoly(this.field, infoCoefficients);
-		info = info.multiplyByMonomial(ecBytes, 1);
-		var remainder = info.divide(generator)[1];
-		var coefficients = remainder.coefficients;
-		var numZeroCoefficients = ecBytes - coefficients.length;
-		for (var i = 0; i < numZeroCoefficients; i++) {
-			toEncode[dataBytes + i] = 0;
-		}
-		toEncode.set(coefficients.subarray(0, coefficients.length), dataBytes + numZeroCoefficients);
-	}
-};
-
-var ReedSolomonDecoder = function () { this.init.apply(this, arguments) };
-ReedSolomonDecoder.prototype = {
-	init : function (field) {
-		this.field = field;
-	},
-
-	decode : function (received, twoS) {
-		var poly = new GenericGFPoly(this.field, received);
-		var syndromeCoefficients = new Int32Array(twoS);
-		var noError = true;
-		for (var i = 0; i < twoS; i++) {
-			var eval_ = poly.evaluateAt(this.field.exp(i + this.field.generatorBase));
-			syndromeCoefficients[syndromeCoefficients.length - 1 - i] = eval_;
-			if (eval_ !== 0) {
-				noError = false;
-			}
-		}
-
-		if (noError) {
-			return;
-		}
-		var syndrome = new GenericGFPoly(this.field, syndromeCoefficients);
-		var sigmaOmega = this.runEuclideanAlgorithm(this.field.buildMonomial(twoS, 1), syndrome, twoS);
-		var sigma = sigmaOmega[0];
-		var omega = sigmaOmega[1];
-		var errorLocations = this.findErrorLocations(sigma);
-		var errorMagnitudes = this.findErrorMagnitudes(omega, errorLocations);
-		for (var i = 0; i < errorLocations.length; i++) {
-			var position = received.length - 1 - this.field.log(errorLocations[i]);
-			if (position < 0) {
-				throw new Error('ReedSolomonException("Bad error location")');
-			}
-			received[position] = GenericGF.addOrSubtract(received[position], errorMagnitudes[i]);
-		}
-	},
-
-	runEuclideanAlgorithm : function (a, b, R) {
-		// Assume a's degree is >= b's
-		if (a.degree < b.degree) {
-			var temp = a;
-			a = b;
-			b = temp;
-		}
-
-		var rLast = a;
-		var r = b;
-		var tLast = this.field.zero;
-		var t = this.field.one;
-
-		// Run Euclidean algorithm until r's degree is less than R/2
-		while (r.degree >= R / 2) {
-			var rLastLast = rLast;
-			var tLastLast = tLast;
-			rLast = r;
-			tLast = t;
-
-			// Divide rLastLast by rLast, with quotient in q and remainder in r
-			if (rLast.isZero()) {
-				// Oops, Euclidean algorithm already terminated?
-				throw new Error('ReedSolomonException("r_{i-1} was zero")');
-			}
-			r = rLastLast;
-			var q = this.field.zero;
-			var denominatorLeadingTerm = rLast.getCoefficient(rLast.degree);
-			var dltInverse = this.field.inverse(denominatorLeadingTerm);
-			while (r.degree >= rLast.degree && !r.isZero()) {
-				var degreeDiff = r.degree - rLast.degree;
-				var scale = this.field.multiply(r.getCoefficient(r.degree), dltInverse);
-				q = q.addOrSubtract(this.field.buildMonomial(degreeDiff, scale));
-				r = r.addOrSubtract(rLast.multiplyByMonomial(degreeDiff, scale));
-			}
-
-			t = q.multiply(tLast).addOrSubtract(tLastLast);
-
-			if (r.degree >= rLast.degree) {
-				throw new Error('IllegalStateException("Division algorithm failed to reduce polynomial?")');
-			}
-		}
-
-		var sigmaTildeAtZero = t.getCoefficient(0);
-		if (sigmaTildeAtZero === 0) {
-			throw new Error('ReedSolomonException("sigmaTilde(0) was zero")');
-		}
-
-		var inverse = this.field.inverse(sigmaTildeAtZero);
-		var sigma = t.multiply(inverse);
-		var omega = r.multiply(inverse);
-		return [ sigma, omega ];
-	},
-
-	findErrorLocations : function (errorLocator) {
-		// This is a direct application of Chien's search
-		var numErrors = errorLocator.degree;
-		if (numErrors == 1) { // shortcut
-			return new Int32Array([  errorLocator.getCoefficient(1)  ]);
-		}
-		var result = new Int32Array(numErrors);
-		var e = 0;
-		for (var i = 1; i < this.field.size && e < numErrors; i++) {
-			if (errorLocator.evaluateAt(i) === 0) {
-				result[e] = this.field.inverse(i);
-				e++;
-			}
-		}
-		if (e != numErrors) {
-			throw new Error('ReedSolomonException("Error locator degree does not match number of roots")');
-		}
-		return result;
-	},
-
-	findErrorMagnitudes : function (errorEvaluator, errorLocations) {
-		// This is directly applying Forney's Formula
-		var s = errorLocations.length;
-		var result = new Int32Array(s);
-		for (var i = 0; i < s; i++) {
-			var xiInverse = this.field.inverse(errorLocations[i]);
-			var denominator = 1;
-			for (var j = 0; j < s; j++) {
-				if (i != j) {
-					denominator = this.field.multiply(denominator, GenericGF.addOrSubtract(1, this.field.multiply(errorLocations[j], xiInverse)));
-				}
-			}
-			result[i] = this.field.multiply(errorEvaluator.evaluateAt(xiInverse), this.field.inverse(denominator));
-			if (this.field.generatorBase !== 0) {
-				result[i] = this.field.multiply(result[i], xiInverse);
-			}
-		}
-		return result;
-	}
-};
-
-// System.arraycopy(src, srcPos, dest, destPos, length);
-// dest.set(src.subarray(srcPos, srcPos + length), destPos);
-
-function lazy (func) {
-	var val;
-	return function () {
-		if (!val) {
-			val = func();
-		}
-		return val;
-	};
-}
-
-GenericGF.AZTEC_DATA_12 = lazy(function () { return new GenericGF(0x1069, 4096, 1) }); // x^12 + x^6 + x^5 + x^3 + 1
-GenericGF.AZTEC_DATA_10 = lazy(function () { return new GenericGF(0x409, 1024, 1) }); // x^10 + x^3 + 1
-GenericGF.AZTEC_DATA_6 = lazy(function () { return new GenericGF(0x43, 64, 1) }); // x^6 + x + 1
-GenericGF.AZTEC_PARAM = lazy(function() { return new GenericGF(0x13, 16, 1) }); // x^4 + x + 1
-GenericGF.QR_CODE_FIELD_256 = lazy(function () { return new GenericGF(0x011D, 256, 0) }); // x^8 + x^4 + x^3 + x^2 + 1
-GenericGF.DATA_MATRIX_FIELD_256 = lazy(function () { return new GenericGF(0x012D, 256, 1) }); // x^8 + x^5 + x^3 + x^2 + 1
-GenericGF.AZTEC_DATA_8 = GenericGF.DATA_MATRIX_FIELD_256;
-GenericGF.MAXICODE_FIELD_64 = GenericGF.AZTEC_DATA_6;
-
-this.GenericGF = GenericGF;
-this.GenericGFPoly = GenericGFPoly;
-this.ReedSolomonEncoder = ReedSolomonEncoder;
-this.ReedSolomonDecoder = ReedSolomonDecoder;
-
-function dump (array) {
-	console.log(Array.prototype.join.call(array));
-}
-
-},{}],160:[function(require,module,exports){
+},{"../function/sm3_index":159,"./RandomNum":156}],159:[function(require,module,exports){
 /**
  * 左补0到指定长度
  */
@@ -23777,179 +23222,7 @@ module.exports = function(str,flag,res) {
     return( res==0?binary2hex(V):V);
 };
 
-},{}],161:[function(require,module,exports){
-const DECRYPT = 0;
-const ROUND = 32;
-const BLOCK = 16;
-
-const Sbox = [
-    0xd6, 0x90, 0xe9, 0xfe, 0xcc, 0xe1, 0x3d, 0xb7, 0x16, 0xb6, 0x14, 0xc2, 0x28, 0xfb, 0x2c, 0x05,
-    0x2b, 0x67, 0x9a, 0x76, 0x2a, 0xbe, 0x04, 0xc3, 0xaa, 0x44, 0x13, 0x26, 0x49, 0x86, 0x06, 0x99,
-    0x9c, 0x42, 0x50, 0xf4, 0x91, 0xef, 0x98, 0x7a, 0x33, 0x54, 0x0b, 0x43, 0xed, 0xcf, 0xac, 0x62,
-    0xe4, 0xb3, 0x1c, 0xa9, 0xc9, 0x08, 0xe8, 0x95, 0x80, 0xdf, 0x94, 0xfa, 0x75, 0x8f, 0x3f, 0xa6,
-    0x47, 0x07, 0xa7, 0xfc, 0xf3, 0x73, 0x17, 0xba, 0x83, 0x59, 0x3c, 0x19, 0xe6, 0x85, 0x4f, 0xa8,
-    0x68, 0x6b, 0x81, 0xb2, 0x71, 0x64, 0xda, 0x8b, 0xf8, 0xeb, 0x0f, 0x4b, 0x70, 0x56, 0x9d, 0x35,
-    0x1e, 0x24, 0x0e, 0x5e, 0x63, 0x58, 0xd1, 0xa2, 0x25, 0x22, 0x7c, 0x3b, 0x01, 0x21, 0x78, 0x87,
-    0xd4, 0x00, 0x46, 0x57, 0x9f, 0xd3, 0x27, 0x52, 0x4c, 0x36, 0x02, 0xe7, 0xa0, 0xc4, 0xc8, 0x9e,
-    0xea, 0xbf, 0x8a, 0xd2, 0x40, 0xc7, 0x38, 0xb5, 0xa3, 0xf7, 0xf2, 0xce, 0xf9, 0x61, 0x15, 0xa1,
-    0xe0, 0xae, 0x5d, 0xa4, 0x9b, 0x34, 0x1a, 0x55, 0xad, 0x93, 0x32, 0x30, 0xf5, 0x8c, 0xb1, 0xe3,
-    0x1d, 0xf6, 0xe2, 0x2e, 0x82, 0x66, 0xca, 0x60, 0xc0, 0x29, 0x23, 0xab, 0x0d, 0x53, 0x4e, 0x6f,
-    0xd5, 0xdb, 0x37, 0x45, 0xde, 0xfd, 0x8e, 0x2f, 0x03, 0xff, 0x6a, 0x72, 0x6d, 0x6c, 0x5b, 0x51,
-    0x8d, 0x1b, 0xaf, 0x92, 0xbb, 0xdd, 0xbc, 0x7f, 0x11, 0xd9, 0x5c, 0x41, 0x1f, 0x10, 0x5a, 0xd8,
-    0x0a, 0xc1, 0x31, 0x88, 0xa5, 0xcd, 0x7b, 0xbd, 0x2d, 0x74, 0xd0, 0x12, 0xb8, 0xe5, 0xb4, 0xb0,
-    0x89, 0x69, 0x97, 0x4a, 0x0c, 0x96, 0x77, 0x7e, 0x65, 0xb9, 0xf1, 0x09, 0xc5, 0x6e, 0xc6, 0x84,
-    0x18, 0xf0, 0x7d, 0xec, 0x3a, 0xdc, 0x4d, 0x20, 0x79, 0xee, 0x5f, 0x3e, 0xd7, 0xcb, 0x39, 0x48
-];
-
-const CK = [
-    0x00070e15, 0x1c232a31, 0x383f464d, 0x545b6269,
-    0x70777e85, 0x8c939aa1, 0xa8afb6bd, 0xc4cbd2d9,
-    0xe0e7eef5, 0xfc030a11, 0x181f262d, 0x343b4249,
-    0x50575e65, 0x6c737a81, 0x888f969d, 0xa4abb2b9,
-    0xc0c7ced5, 0xdce3eaf1, 0xf8ff060d, 0x141b2229,
-    0x30373e45, 0x4c535a61, 0x686f767d, 0x848b9299,
-    0xa0a7aeb5, 0xbcc3cad1, 0xd8dfe6ed, 0xf4fb0209,
-    0x10171e25, 0x2c333a41, 0x484f565d, 0x646b7279
-];
-
-function rotl(x, y) {
-    return x << y | x >>> (32 - y);
-}
-
-function byteSub(a) {
-    return (Sbox[a >>> 24 & 0xFF] & 0xFF) << 24 | (Sbox[a >>> 16 & 0xFF] & 0xFF) << 16 | (Sbox[a >>> 8 & 0xFF] & 0xFF) << 8 | (Sbox[a & 0xFF] & 0xFF);
-}
-
-function l1(b) {
-    return b ^ rotl(b, 2) ^ rotl(b, 10) ^ rotl(b, 18) ^ rotl(b, 24);
-}
-
-function l2(b) {
-    return b ^ rotl(b, 13) ^ rotl(b, 23);
-}
-
-function sms4Crypt(input, output, roundKey) {
-    let r;
-    let mid;
-    let x = new Array(4);
-    let tmp = new Array(4);
-    for(let i = 0; i < 4; i++) {
-        tmp[0] = input[0 + 4 * i] & 0xff;
-        tmp[1] = input[1 + 4 * i] & 0xff;
-        tmp[2] = input[2 + 4 * i] & 0xff;
-        tmp[3] = input[3 + 4 * i] & 0xff;
-        x[i] = tmp[0] << 24 | tmp[1] << 16 | tmp[2] << 8 | tmp[3];
-    }
-
-    for(r = 0; r < 32; r += 4) {
-        mid = x[1] ^ x[2] ^ x[3] ^ roundKey[r + 0];
-        mid = byteSub(mid);
-        x[0] = x[0] ^ l1(mid); // x4
-        
-        mid = x[2] ^ x[3] ^ x[0] ^ roundKey[r + 1];
-        mid = byteSub(mid);
-        x[1] = x[1] ^ l1(mid); // x5
-        
-        mid = x[3] ^ x[0] ^ x[1] ^ roundKey[r + 2];
-        mid = byteSub(mid);
-        x[2] = x[2] ^ l1(mid); // x6
-        
-        mid = x[0] ^ x[1] ^ x[2] ^ roundKey[r + 3];
-        mid = byteSub(mid);
-        x[3] = x[3] ^ l1(mid); // x7
-    }
-    
-    //Reverse
-    for(let j = 0; j < 16; j += 4) {
-        output[j] = x[3 - j / 4] >>> 24 & 0xff;
-        output[j+1] = x[3 - j / 4] >>> 16 & 0xff;
-        output[j+2] = x[3 - j / 4] >>> 8 & 0xff;
-        output[j+3] = x[3 - j / 4] & 0xff;
-    }
-}
-
-function sms4KeyExt(key, roundKey, cryptFlag) {
-    let r;
-    let mid;
-    let x = new Array(4);
-    let tmp = new Array(4);
-
-    for (let i = 0; i < 4; i++) {
-        tmp[0] = key[0 + 4 * i] & 0xff;
-        tmp[1] = key[1 + 4 * i] & 0xff;
-        tmp[2] = key[2 + 4 * i] & 0xff;
-        tmp[3] = key[3 + 4 * i] & 0xff;
-        x[i] = tmp[0] << 24 | tmp[1] << 16 | tmp[2] << 8 | tmp[3];
-    }
-
-    x[0] ^= 0xa3b1bac6;
-    x[1] ^= 0x56aa3350;
-    x[2] ^= 0x677d9197;
-    x[3] ^= 0xb27022dc;
-
-    for(r = 0; r < 32; r += 4) {
-        mid = x[1] ^ x[2] ^ x[3] ^ CK[r+0];
-        mid = byteSub(mid);
-        roundKey[r + 0] = x[0] ^= l2(mid); // roundKey0 = K4
-        
-        mid = x[2] ^ x[3] ^ x[0] ^ CK[r+1];
-        mid = byteSub(mid);
-        roundKey[r + 1] = x[1] ^= l2(mid); // roundKey1 = K5
-        
-        mid = x[3] ^ x[0] ^ x[1] ^ CK[r+2];
-        mid = byteSub(mid);
-        roundKey[r + 2] = x[2] ^= l2(mid); // roundKey2 = K6
-        
-        mid = x[0] ^ x[1] ^ x[2] ^ CK[r + 3];
-        mid = byteSub(mid);
-        roundKey[r + 3] = x[3] ^= l2(mid); // roundKey3 = K7
-    }
-        
-    // 解密时轮密钥使用顺序：roundKey31, roundKey30, ..., roundKey0
-    if(cryptFlag === DECRYPT) {
-        for(r = 0; r < 16; r++) {
-            mid = roundKey[r];
-            roundKey[r] = roundKey[31 - r];
-            roundKey[31 - r] = mid;
-        }
-    }
-}
-
-function sm4(inArray, key, cryptFlag) {
-    let outArray = [];
-    let point = 0;
-    let roundKey = new Array(ROUND); 
-    sms4KeyExt(key, roundKey, cryptFlag);
-
-    let input = new Array(16);
-    let output = new Array(16);
-
-    let inLen = inArray.length;
-    while (inLen >= BLOCK) {
-        input = inArray.slice(point, point + 16);
-        sms4Crypt(input, output, roundKey);
-        
-        for (let i = 0; i < BLOCK; i++) {
-            outArray[point + i] = output[i];
-        }
-
-        inLen -= BLOCK;
-        point += BLOCK;
-    }
-
-    return outArray;
-}
-
-module.exports = {
-    encrypt(inArray, key) {
-        return sm4(inArray, key, 1);
-    },
-    decrypt(inArray, key) {
-        return sm4(inArray, key, 0);
-    }
-};
-
-},{}],162:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 // running on node.js
 /**
  * 左补0到指定长度
@@ -24105,112 +23378,56 @@ function Bytes2Str(arr) {
     return str;
 }
 
-function unpad(array){
-    const del = array[0];
-    for(var i =0;i<del;i++)array.shift();
+var excludeSpecial = function(s) {  
+    // 去掉转义字符  
+    s = s.replace(/[\'\"\\\/\b\f\n\r\t]/g, '');  
+    // 去掉特殊字符  
+    s = s.replace(/[\@\#\$\%\^\&\*\{\}\:\"\L\<\>\?]/);  
+    return s;  
+ }; 
+
+function randomRange(myMin, myMax) {
+    return Math.floor(Math.random()*(myMax - myMin + 1)) + myMin; 
 }
 
-
-
-
-
-
-//sm4输入输出均为字节数组形式
-//sm3支持字符形式输入或者二进制形式输入
 window.random = require('../function/RandomNum');
 window.pbkdf2 = require("../function/improved_pbkdf2").pbkdf2;
 window.sm3 = require('../function/sm3_index');
-window.sm4_encrypt = require('../function/sm4_index').encrypt;
-window.sm4_decrypt = require('../function/sm4_index').decrypt;
-window.recombSrct = require('../function/SecretShareRS').reCombine;
+window.Base64 = require('../function/base64').Base64;
 
-function Check(Data,hash,n){//十六进制字符串形式
-    var cnt = 0;//cnt记录了被攻击的服务器个数
-    for(var i = 0;i<n;i++){
-        if((sm3(Data[i],0,0)==hash[i])==false){
-            cnt++;
-        }
+//输入为base 64格式，kLen是需要的字节长度 一般在8-16字节？
+//模式1为有特殊字符 0为无
+window.password_gen = function(Site_UserName,MP,T,mode){
+    const kLen = randomRange(12,16);
+    const hashUsername = sm3(Site_UserName, 0,1);
+    const t = sm3(T,0,1);
+    const salt1 = binary2hex(Bytes2Str(random(32)));
+    const Salt1 = Str2Bytes(binary2hex(binaryCal(salt1,hashUsername,xor)));
+
+    const P = pbkdf2(MP,Salt1,20);//P是字符串
+
+    const salt2 = binary2hex(Bytes2Str(random(32)));
+    const Salt2 = Str2Bytes(binary2hex(binaryCal(salt2,t,xor)));
+
+    const Site_Password = pbkdf2(P,Salt2,20);
+    const base64code = Base64.encode(Byte2Ascii(Str2Bytes(Site_Password)));
+
+    if(mode == 1){
+        base = base64code.substr(base64code.length-kLen,kLen-1);
+        r = randomRange(0,kLen-1);
+        return base.slice(0, r) + '_' + base.slice(r);
     }
-    return cnt;
-}
-
-
-
-//base64输入
-window.recombine = function(Data,n,k,Msg){
-    var Salt = [];//十六进制字符串形式
-    var Cipher = [];//十六进制字符串形式
-    var hash = [];//十六进制字符串形式
- 
-    for(var i =0;i<n;i++){
-        var data = Data[i].split('!');
-        Cipher.push(data[1])
-        hash.push(data[2]);
-        //console.log(hash[i]);
+    if(mode == 0){
+        basecode = excludeSpecial(base64code);
+        return basecode.substr(0,kLen);
     }
-    check = Check(Cipher,hash,n,k);
+}//输出同样为base64
 
-    if(check > 0){
-        console.log(check+'台服务器数据被篡改！数据可能无法恢复！');
-    }
-
-    var cipher = [];//字节数组形式
-    var W = [];
-
-    for(var i =0;i<n;i++){
-        cipher.push(Str2Bytes(Cipher[i]));//字节数组形式     
-    }
-
-    const Secret = recombSrct(cipher,n,k);//字节数组形式
-
-    const secret = hex2binary(Bytes2Str(Secret));//二进制形式
-
-    const Difference = secret.substr(0,256);
-    const C = secret.substring(256,secret.length);//C是二进制字符串
-
-    const Key = binaryCal(Difference,sm3(C,1,1),xor);
-   
-    const K = Str2Bytes(binary2hex(Key));
-    //console.log(K.join(""));
-
-
-    const P = sm4_decrypt(Str2Bytes(binary2hex(C)),K);
-    unpad(P);
-    const p =Byte2Ascii(P).split('!');
-    const info = {
-        Site_Username :p[0],
-        Site_Password :p[1]
-    }
-    //console.log(info);
-    if(p[2]==Msg)console.log("预留信息验证成功！")
-    return info;
-    
-}
 module.exports = {
-    recombine(Data,n,k,Msg){
-        return recombine(Data,n,k,Msg);
+    password_gen(Site_UserName,MP,T,mode){
+        return password_gen(Site_UserName,MP,T,mode);
     }
 }
 
-/*
-recombine([ 'baidu.com.local!58e352a0af0e242e8ec0d15b271c37a05c1b35061e43c08b66f51c39c04e1f6817ad4e3b97ac3ede!07472387a27a788e188d3dfc193df342d48ca751c2c0c2234050009c097ca3d8',
-'baidu.com.local!c7ba0416bbce8438360f1126b36585d15a5c871df7d544d0e0b233412dfee90e1517edd68a1dec33!1a40687fc3a28be3af9c0d9780293b870194467fa05a0fcdeb88187e8dcfd769',
-'baidu.com.local!2d9e70ea97ddd6771f1ae543dfca46c2aca9139b8f7892261788173f6663e70c450ef267cd1a246e!f972546b3524c244ad6e4c6d57eda043fc3d2cd2958588d048e4c76aa4e543e5',
-'baidu.com.local!f82aea18d536b4b89a6e912658a2d27f39877e8b02b7b13a1bea9e95725e301358c7978d962be259!f34979228bec06d195f03a08cfe6d93df5781d3fe1750feb012d2502992c7caf' ],4,3,'buaanb');
-/*
-[ 'baidu.com.local!d5239ae80bb709047d7c6e6244c8bca187e572935d883a81449dab3b2ffa759dab05e0f52630d7b5bc1b83c76de3ff5e50b85120105111a967d2959b5001f949!a212887a270b34f216afc90e18ece64820208355d1e6d731a8dc71958507a06a3c4f0f9ed8e868c0cb0fb3c094cc55fc!bb2694c4e558e0e0d171275260ccbe039958c63a07438a16401c2756902196ea',
-'baidu.com.local!920110cb9a2bfb67893777ca5cf7e4813624235fe017774ee56798a7d69be84d66bca26dff7009c0d3eec9431625a621ee79b1b941c4f72ba9ea407cdec60cd0!bba0b358b3fae1fd42064ca1ceff64d162d917c563120fefd81611f55808bc4214d16dbd8aa237b67587cc3c0565cb10!e838954f0936b5f8d8081a329fe11e4c9528334f793ba3cce06653e6b14bbfe2',
-'baidu.com.local!26177745c4b7bfa875d6b27257fd58ba1b5f11e3827e2b62802f3366cd4e611a90a3efcf1069a6a981ed9d7a0f08d22fc4f223d4444ab7bb7832450f3df9bc4f!f49ba80c7c392e64d969324944777acab34db711eb666030f539f014be84a56a3d273892597115c328bf8fa3c9419ef8!460d0d3d5629f14cb7604adcd2b88cb4e71ce7c6929aad089153781137dfe33e',
-'baidu.com.local!2930d86fbc1158c9faeca8120e0e1bb5f0e577a4c5a0d33969f17cd678ad87732253788eeba527b652822c5c0d07f439ca021845a40f42de5d9f64de74523e67!cc020f0ab88adedef7696efe300b59a124bdd0d06f6aab262efa58fe3f40331ca4305d651d86cbff277a0c46aff86fab!555aad05b4b940104666cdf0692cce2c2d925ffb2bd3ccbf904a8b1e16e0c488' ]
-<Buffer d5 23 9a e8 0b b7 09 04 7d 7c 6e 62 44 c8 bc a1 87 e5 72 93 5d 88 3a 81 44 9d ab 3b 2f fa 75 9d>
-<Buffer ab 05 e0 f5 26 30 d7 b5 bc 1b 83 c7 6d e3 ff 5e 50 b8 51 20 10 51 11 a9 67 d2 95 9b 50 01 f9 49>
-<Buffer 92 01 10 cb 9a 2b fb 67 89 37 77 ca 5c f7 e4 81 36 24 23 5f e0 17 77 4e e5 67 98 a7 d6 9b e8 4d>
-<Buffer 66 bc a2 6d ff 70 09 c0 d3 ee c9 43 16 25 a6 21 ee 79 b1 b9 41 c4 f7 2b a9 ea 40 7c de c6 0c d0
->
-21335154232111839412512411098682001881611352291141479313658129681571715947250117157
-17152242453848215181188271311991092272559480184813216811716910321014915580124973
-14611620315443251103137551192029224722812954363595224231197822910315216721415523277
-10218816210925511291922112382016722371663323812117718565196247431692346412422219812208
-*/
-
-},{"../function/RandomNum":156,"../function/SecretShareRS":157,"../function/improved_pbkdf2":158,"../function/sm3_index":160,"../function/sm4_index":161}]},{},[162]);
+//console.log(password_gen("adadad%%@#!","AA@#A3ad","12324df",1));
+},{"../function/RandomNum":156,"../function/base64":157,"../function/improved_pbkdf2":158,"../function/sm3_index":159}]},{},[160]);
